@@ -4,6 +4,8 @@ notify() {
 	osascript -e "display notification \"$2\" with title \"$1\" subtitle \"$3\""
 }
 
+echo $(date)
+
 jsondata=$(http https://adventofcode.com/2022/leaderboard/private/view/2685005.json Cookie:"${AOC_COOKIE}")
 
 sqlite3 data.sqlite "CREATE TABLE IF NOT EXISTS USERS (ID INT, NAME TEXT, LAST_STAR_TS INT, LOCAL_SCORE INT, STARS INT);"
