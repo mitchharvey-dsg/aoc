@@ -26,12 +26,12 @@ for data in $(echo "${jsondata}" | jq -cr '.members[]'); do
 
 	if [ -z "$stored_last_star_ts" ]; then # Not in DB yet
 		sqlite3 data.sqlite "INSERT INTO USERS VALUES (${id}, \"${name}\", ${last_star_ts}, ${local_score}, ${stars});"
-		notify "${name} has joined the leaderboard!" "" ""
+		notify "${name} has joined the leaderboard!" "with ${local_score} points, and ${stars} stars!" ""
 	else
 		if [ "$stored_last_star_ts" -ne "$last_star_ts" ]; then # Made progress since last refresh
 			progress=true
 			sqlite3 data.sqlite "UPDATE USERS SET LAST_STAR_TS=${last_star_ts}, LOCAL_SCORE=${local_score}, STARS=${stars} WHERE ID=${id};"
-			notify "${name} now has ${stars} stars!" "and ${local_score} points!" ""
+			notify "${name} now has ${local_score} points!" "and ${stars} stars!" ""
 		fi
 	fi
 
@@ -42,5 +42,5 @@ if [ "$progress" = true ]; then
 	top_score=$(sqlite3 data.sqlite "SELECT MAX(LOCAL_SCORE) FROM USERS")
 	top_name=$(sqlite3 data.sqlite "SELECT NAME FROM USERS WHERE LOCAL_SCORE=${top_score} LIMIT 1;")
 	top_stars=$(sqlite3 data.sqlite "SELECT STARS FROM USERS WHERE LOCAL_SCORE=${top_score} LIMIT 1;")
-	notify "${name} is now in first place!" "with ${top_stars} stars and ${top_score} points!" ""
+	notify "${top_name} is now in first place!" "with ${top_score} points, and ${top_stars} stars!" ""
 fi
