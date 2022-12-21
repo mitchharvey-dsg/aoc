@@ -9,26 +9,15 @@
 
 ;;;
 
+(define (combine-ranges list-ranges)
+  (for/fold ([total-range (car list-ranges)])
+            ([cur-range list-ranges])
+    (if (<= (car cur-range) (+ (cadr total-range) 1))
+        (list (car total-range) (max (cadr total-range) (cadr cur-range)))
+        total-range)))
 
-(define MAP (make-hash))
-
-(define (unmark1 x y)
-  (hash-remove! MAP (~a x ":" y)))
-
-(define (mark1 x y)
-  (hash-set! MAP (~a x ":" y) #t))
-
-(define (mark cx cy r)
-  (define farx (+ r 1))
-  (for ([i (in-range farx)])
-    (when (= (modulo i 1000) 0)
-      (println i))
-    (for ([j (in-range (- farx i))])
-      (when (or (= (+ cy j) 2000000) (= (- cy j) 2000000))
-        (mark1 (+ cx i) (+ cy j))
-        (mark1 (+ cx i) (- cy j))
-        (mark1 (- cx i) (+ cy j))
-        (mark1 (- cx i) (- cy j))))))
+(define (range-contains a b)
+  (and (<= (car a) (car b)) (>= (cadr a) (cadr b))))
 
 (define (manhtn x1 y1 x2 y2)
   (+ (abs (- x2 x1)) (abs (- y2 y1))))
@@ -41,33 +30,46 @@
 (define (dist a b)
   (abs (- a b)))
 
-(define Y-TGT 2000000)
+(struct circle (x y radius) #:transparent)
 
-(call-with-input-file "input_clean"
-  (lambda(input)
-    (for ([line (in-lines input)])
-      (define coords (map string->number (string-split line ",")))
-      (define d (apply manhtn coords))
-      (define dist-to-y (dist (cadr coords) Y-TGT))
-      (define x-width (width-at-dist d dist-to-y))
-      (println (~a coords ":" d "," dist-to-y "," x-width))
-      (when (> x-width 0)
-        (for ([i (in-range (+ x-width 1))])
-          (mark1 (- (car coords) i) Y-TGT)
-          (mark1 (+ (car coords) i) Y-TGT)))))
-  #:mode 'text)
+(define CIRCLES
+  (call-with-input-file "input_clean"
+    (lambda(input)
+      (for/list ([line (in-lines input)])
+        (define coords (map string->number (string-split line ",")))
+        (define radius (apply manhtn coords))
+        (define X (car coords))
+        (define Y (cadr coords))
+        (circle X Y radius)))
+    #:mode 'text))
 
-(call-with-input-file "input_clean"
-  (lambda(input)
-    (for ([line (in-lines input)])
-      (define coords (map string->number (string-split line ",")))
-      (unmark1 (list-ref coords 2) (list-ref coords 3))
-      ))
-  #:mode 'text)
+(for ([y-tgt 4000000])
 
-;MAP
+  (define circle-ranges
+    (filter
+     (lambda (c)
+       (> (dist (car c) (cadr c)) 0))
+     (map
+      (lambda (c)
+        (define dist-to-y (dist (circle-y c) y-tgt))
+        (define x-width (width-at-dist (circle-radius c) dist-to-y))
+        (list (- (circle-x c) x-width) (+ (circle-x c) x-width)))
+      CIRCLES)))
 
-(length (hash-keys MAP))
+  (define sorted-circle-ranges
+    (sort
+     circle-ranges
+     (lambda (a b)
+       (< (car a) (car b)))))
 
-;(length (filter (lambda (x) (string-suffix? x ":2000000")) (hash-keys MAP)))
-;(length (filter (lambda (x) (string-prefix? x "2000000:")) (hash-keys MAP)))
+  (define max-range (combine-ranges sorted-circle-ranges))
+
+  (when (= 0 (modulo (+ 1 y-tgt) 10000))
+    (display "."))
+
+  (when (= 0 (modulo (+ 1 y-tgt) 1000000))
+    (display "\n"))
+
+  (when (not (range-contains max-range '(0 4000000)))
+    (display (~a "\n" y-tgt ", " (+ 1 (cadr max-range)) "\n"))
+    (println (+ (* (+ 1 (cadr max-range)) 4000000) y-tgt))))
