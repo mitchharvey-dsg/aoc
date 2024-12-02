@@ -3,3 +3,5 @@
 *.sqlite
 .vscode/
 pt
+.zig-cache
+zig-out
