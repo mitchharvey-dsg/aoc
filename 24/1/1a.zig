@@ -1,25 +1,6 @@
 const std = @import("std");
 const print = std.debug.print;
 
-pub fn count(comptime T: type, haystack: []T, needle: T) i32 {
-    // Assume haystack is sorted
-    // lazy
-
-    var found = false;
-    var c: i32 = 0;
-
-    for (haystack) |item| {
-        if (item == needle) {
-            found = true;
-            c += 1;
-        } else if (found) { // we already found the section of needles, break and return
-            break;
-        }
-    }
-
-    return c;
-}
-
 pub fn main() !void {
     var file = try std.fs.cwd().openFile("../1/input", .{});
     defer file.close();
@@ -47,9 +28,11 @@ pub fn main() !void {
     std.mem.sort(i32, listA.items, {}, comptime std.sort.desc(i32));
     std.mem.sort(i32, listB.items, {}, comptime std.sort.desc(i32));
 
-    var diff: i32 = 0;
-    for (listA.items[0..]) |a| {
-        diff += a * count(i32, listB.items, a);
+    var diff: u32 = 0;
+    for (listA.items[0..], listB.items[0..]) |a, b| {
+        if (a != b) {
+            diff += @abs(a - b);
+        }
     }
 
     print("{d}", .{diff});
