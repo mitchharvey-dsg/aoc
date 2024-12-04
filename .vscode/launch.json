@@ -1,0 +1,33 @@
+{
+        "version": "0.2.0",
+        "configurations": [
+                {
+                        "name": "(lldb) Launch",
+                        "type": "cppdbg",
+                        "request": "launch",
+                        "program": "${workspaceFolder}/24/zig-out/bin/24",
+                        "args": [],
+                        "stopAtEntry": false,
+                        "cwd": "${fileDirname}",
+                        "environment": [],
+                        "externalConsole": false,
+                        "internalConsoleOptions": "openOnSessionStart",
+                        "MIMode": "lldb",
+                        "preLaunchTask": "Build (Debug)",
+                        "logging": {
+                                "moduleLoad": false
+                        }
+                },
+                {
+                        "args": [],
+                        "console": "integratedTerminal",
+                        "cwd": "${fileDirname}",
+                        "internalConsoleOptions": "neverOpen",
+                        "name": "Launch",
+                        "preLaunchTask": "Build (Debug)",
+                        "program": "${workspaceFolder}/24/zig-out/bin/24",
+                        "request": "launch",
+                        "type": "lldb"
+                }
+        ]
+}
